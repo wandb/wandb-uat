@@ -1,6 +1,5 @@
-import numpy as np
 import keras
-
+import numpy as np
 import wandb
 from wandb.keras import WandbCallback
 

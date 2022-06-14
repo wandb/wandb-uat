@@ -1,10 +1,10 @@
 from typing import Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-
 import wandb
+from torch.utils.data import DataLoader, Dataset
 
 
 class Net(nn.Module):

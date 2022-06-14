@@ -1,8 +1,7 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
-
 import wandb
+from tensorflow import keras
 
 
 class MyModel(keras.Model):
