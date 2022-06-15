@@ -1,2 +1,2 @@
 # wandb-uat
-User acceptance testing
+User acceptance testing for the Weights & Biases library.
