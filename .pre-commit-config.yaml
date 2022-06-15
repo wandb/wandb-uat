@@ -21,6 +21,11 @@ repos:
     hooks:
       - id: pyupgrade
         args: [--py36-plus, --keep-mock]
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        pass_filenames: true
   - repo: https://github.com/asottile/blacken-docs
     rev: v1.12.1
     hooks:
