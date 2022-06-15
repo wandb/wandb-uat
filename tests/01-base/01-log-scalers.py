@@ -14,6 +14,7 @@ def main():
 
 def check(project, run_id):
     import os
+
     if os.environ.get("WB_UAT_SKIP_CHECK"):
         return
     api = wandb.Api()
