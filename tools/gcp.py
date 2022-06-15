@@ -4,8 +4,6 @@ import subprocess
 import time
 from dataclasses import dataclass, fields
 
-# from typing import Literal, get_args
-
 
 @dataclass
 class Config:
@@ -42,6 +40,18 @@ class CLI:
         subprocess.run(["gcloud", "--quiet", "components", "update"])
 
     def create_vm(self):
+        """
+        Create the VM
+
+        - The first command creates a VM similar to the one
+          the user can get from the GCP marketplace.
+          - There is apparently no way to "interact" with the
+            GCP marketplace directly.
+        - The VMI explicitly asks to install GPU drivers on the first boot,
+          so the second command does it.
+
+        :return:
+        """
         cmd = [
             "gcloud",
             "compute",
@@ -112,6 +122,10 @@ class CLI:
         subprocess.run(cmd)
 
     def delete_vm(self):
+        """
+        Delete the VM
+        :return:
+        """
         subprocess.run(
             [
                 "gcloud",
