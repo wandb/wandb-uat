@@ -54,7 +54,9 @@ def train(
     sync_tensorboard: bool,
 ) -> None:
 
-    run = wandb.init(sync_tensorboard=sync_tensorboard)
+    run: wandb.sdk.wandb_run.Run = wandb.init(
+        sync_tensorboard=sync_tensorboard
+    )  # type: ignore
 
     if sync_tensorboard:
         log_dir = Path().cwd() / "wandb" / "runs"  # TODO clear this directory
