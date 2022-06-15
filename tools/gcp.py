@@ -39,7 +39,7 @@ class CLI:
     def update_components():
         subprocess.run(["gcloud", "--quiet", "components", "update"])
 
-    def create_vm(self):
+    def create_vm(self) -> int:
         """
         Create the VM
 
@@ -95,7 +95,9 @@ class CLI:
                 self.print("Waiting for VM to boot...")
                 time.sleep(10)
 
-    def run_user_acceptance_tests(self):
+        return p.returncode
+
+    def run_user_acceptance_tests(self) -> int:
         """
         Run the user acceptance tests:
           - ssh into the VM
@@ -119,14 +121,15 @@ class CLI:
             "./bin/test.sh",
         ]
         self.print(" ".join(cmd))
-        subprocess.run(cmd)
+        p = subprocess.run(cmd)
+        return p.returncode
 
-    def delete_vm(self):
+    def delete_vm(self) -> int:
         """
         Delete the VM
         :return:
         """
-        subprocess.run(
+        p = subprocess.run(
             [
                 "gcloud",
                 "compute",
@@ -136,6 +139,7 @@ class CLI:
                 "--quiet",
             ]
         )
+        return p.returncode
 
 
 if __name__ == "__main__":
