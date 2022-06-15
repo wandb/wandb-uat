@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import tempfile
 
 import numpy as np
@@ -22,14 +23,12 @@ def main():
         run.log({"path_image": wandb.Image(tmp.name)})
 
     run.finish()
-    check(run_path)
+
+    if not os.environ.get("WB_UAT_SKIP_CHECK"):
+        check(run_path)
 
 
 def check(run_path):
-    import os
-
-    if os.environ.get("WB_UAT_SKIP_CHECK"):
-        return
     api = wandb.Api()
     api_run = api.run(run_path)
     assert api_run.summary["np_image"]["_type"] == "image-file"
