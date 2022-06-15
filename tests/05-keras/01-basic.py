@@ -1,6 +1,13 @@
+#!/usr/bin/env python
+
 import argparse
 from pathlib import Path
 from typing import List
+
+import sys
+
+if not sys.modules.get("keras"):
+    sys.exit(0)
 
 import keras
 import numpy as np
@@ -41,7 +48,9 @@ def main(args):
     if args.tensorboard:
         log_dir = Path().cwd() / "wandb" / "runs"  # TODO clear this directory
         callbacks.append(
-            tf.keras.callbacks.TensorBoard(log_dir=log_dir, update_freq="batch")
+            tf.keras.callbacks.TensorBoard(
+                log_dir=log_dir, update_freq="batch"
+            )
         )
 
     callbacks.append(WandbCallback(monitor="accuracy"))

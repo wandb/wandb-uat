@@ -1,5 +1,11 @@
+#!/usr/bin/env python
+
 import argparse
 from pathlib import Path
+import sys
+
+if not sys.modules.get("tensorflow"):
+    sys.exit(0)
 
 import numpy as np
 import tensorflow as tf
@@ -9,7 +15,7 @@ from tensorflow import keras
 
 class MyModel(keras.Model):
     def __init__(self):
-        super(MyModel, self).__init__()
+        super().__init__()
         self.conv1 = keras.layers.Conv2D(32, 3, activation="relu")
         self.flatten = keras.layers.Flatten()
         self.d1 = keras.layers.Dense(128, activation="relu")
@@ -38,9 +44,13 @@ def train_step(
 
 def get_dataset(size: int, batch: int):
     images = np.random.rand(size, 28, 28, 1)
-    labels = keras.utils.to_categorical(np.random.randint(0, high=10, size=(size,)), 10)
+    labels = keras.utils.to_categorical(
+        np.random.randint(0, high=10, size=(size,)), 10
+    )
     return (
-        tf.data.Dataset.from_tensor_slices((images, labels)).shuffle(size).batch(batch)
+        tf.data.Dataset.from_tensor_slices((images, labels))
+        .shuffle(size)
+        .batch(batch)
     )
 
 
@@ -53,7 +63,9 @@ def main(args):
     loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     optimizer = tf.keras.optimizers.Adam()
     train_loss = tf.keras.metrics.Mean(name="train_loss")
-    train_accuracy = tf.keras.metrics.CategoricalAccuracy(name="train_accuracy")
+    train_accuracy = tf.keras.metrics.CategoricalAccuracy(
+        name="train_accuracy"
+    )
 
     run = wandb.init(sync_tensorboard=args.tensorboard)
 
@@ -72,7 +84,8 @@ def main(args):
             train_accuracy,
         )
         print(
-            f"Step:\t{i}\tLoss:\t{train_loss.result().numpy():.3}\tAccuracy:\t{train_accuracy.result().numpy():.3}"
+            f"Step:\t{i}\tLoss:\t{train_loss.result().numpy():.3}"
+            f"\tAccuracy:\t{train_accuracy.result().numpy():.3}"
         )
         run.log({"mean_loss": train_loss.result().numpy()})
         run.log({"acc": train_accuracy.result().numpy()})
