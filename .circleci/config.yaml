@@ -23,18 +23,6 @@ parameters:
     default: false
 
 commands:
-  setup_docker_buildx:
-    description: Enable remote docker, and install the expanded `buildx` command for the CLI. Only works on alpine-based images.
-    parameters:
-      docker_layer_caching:
-        type: boolean
-        default: false
-    steps:
-      - setup_remote_docker:
-          version: 20.10.12
-          docker_layer_caching: << parameters.docker_layer_caching >>
-      - run: apk add docker-cli-buildx=0.8.2-r2  --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-
   setup_gcloud:
     parameters:
       cluster:
@@ -111,21 +99,6 @@ commands:
           environment:
             GKE_CLUSTER_NAME: << parameters.cluster >>
           no_output_timeout: << parameters.no-output-timeout>>
-
-  get_gke_cluster_credentials:
-    parameters:
-      cluster:
-        description: "cluster name"
-        type: string
-        default: << pipeline.parameters.gcp_cluster_name >>
-    steps:
-      - run:
-          name: "Get gke cluster credentials"
-          command: |
-            gcloud components install gke-gcloud-auth-plugin
-            gcloud container clusters get-credentials << parameters.cluster >>
-          environment:
-            GKE_CLUSTER_NAME: << parameters.cluster >>
 
 jobs:
 
@@ -417,7 +390,7 @@ workflows:
           name: "slack-notify-on-start"
           context: slack-secrets
           # todo? add a link to the pipeline in the message
-          message: ":runner: *Nightly run started!*"
+          message: ":nvidia: :runner: *Nightly NVIDIA UAT run started!*"
       # build docker images
 #      - sdk_docker:
 #          name: "build-cpu-docker-image"
@@ -457,7 +430,7 @@ workflows:
           context: slack-secrets
           requires:
             - shut_down_cluster
-          message: ":checkered_flag: *Nightly run finished!*"
+          message: ":nvidia: :checkered_flag: *Nightly NVIDIA UAT run finished!*"
 
   manual_nightly:
     when: << pipeline.parameters.manual_nightly >>
@@ -466,7 +439,7 @@ workflows:
           name: "slack-notify-on-start"
           context: slack-secrets
           # todo? add a link to the pipeline in the message
-          message: ":runner: *Manual cloud run started!*"
+          message: ":nvidia: :runner: *Manual NVIDIA UAT run started!*"
           execute: << pipeline.parameters.manual_nightly_slack_notify >>
       # check that `pip install wandb` is successful
       - pip_install_wandb:

@@ -19,6 +19,7 @@ class Config:
     gcp_project_id: str = "wandb-client-cicd"
     project: str = "nvidia-ngc-public"
     vm_image_name: str = "nvidia-gpu-cloud-image-pytorch-20220228"
+    # vm_image_name: str = "nvidia-gpu-cloud-image-tensorflow-20220228"
     docker_image_name: str = "nvcr.io/nvidia/pytorch:22.02-py3"
     python_version: str = "3.8"
     git_branch: str = "main"
@@ -118,7 +119,7 @@ class CLI:
             "docker run --gpus all --rm -v ~/wandb-uat:/workspace "
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
             f"{self.config.docker_image_name} "
-            "./bin/test.sh",
+            '/bin/bash -c "pip install wandb[media] && ./bin/test.sh"',
         ]
         self.print(" ".join(cmd))
         p = subprocess.run(cmd)
