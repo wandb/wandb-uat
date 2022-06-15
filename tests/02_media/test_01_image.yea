@@ -1,0 +1,12 @@
+id: 02_media.01_image
+env:
+  - WB_UAT_SKIP_CHECK: "true"
+plugin:
+  - wandb
+assert:
+  - :wandb:runs_len: 1
+  - :wandb:runs[0][config]: {}
+  - :wandb:runs[0][summary][np_image][_type]: image-file
+  - :wandb:runs[0][summary][path_image][_type]: image-file
+  - :wandb:runs[0][summary][pil_image][_type]: image-file
+  - :yea:exit: 0
