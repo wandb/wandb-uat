@@ -5,10 +5,9 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wandb
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.tensorboard import SummaryWriter
-
-import wandb
 
 
 class Net(nn.Module):

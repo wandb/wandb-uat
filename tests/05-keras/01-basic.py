@@ -5,9 +5,8 @@ from typing import List
 import keras
 import numpy as np
 import tensorflow as tf
-from wandb.keras import WandbCallback
-
 import wandb
+from wandb.keras import WandbCallback
 
 
 def get_model():
