@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-from pathlib import Path
 import sys
+from pathlib import Path
 
 if not sys.modules.get("tensorflow"):
     sys.exit(0)
