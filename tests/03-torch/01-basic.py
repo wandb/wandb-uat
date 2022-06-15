@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-
-import sys
-import tempfile
+import argparse
+from pathlib import Path
 from typing import Tuple
 
 if not sys.modules.get("torch"):
@@ -10,10 +8,9 @@ if not sys.modules.get("torch"):
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wandb
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.tensorboard import SummaryWriter
-
-import wandb
 
 
 class Net(nn.Module):
@@ -37,7 +34,7 @@ class Net(nn.Module):
 
 
 class CustomDataset(Dataset):
-    def __init__(self, size: int = 6000) -> None:
+    def __init__(self, size: int) -> None:
         self.img_labels = torch.randint(10, (size,))
         self.imgs = torch.randn(size, 1, 28, 28)
 
@@ -55,45 +52,75 @@ def train(
     optimizer: torch.optim.Optimizer,
     loss_fn: nn.Module,
     dataloader: DataLoader,
+    sync_tensorboard: bool,
 ) -> None:
 
-    run = wandb.init(sync_tensorboard=True)
+    run = wandb.init(sync_tensorboard=sync_tensorboard)
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        writer = SummaryWriter(tmp_dir)
+    if sync_tensorboard:
+        log_dir = Path().cwd() / "wandb" / "runs"  # TODO clear this directory
+        writer = SummaryWriter(log_dir)
 
-        for i, data in enumerate(dataloader):
-            inputs, labels = data
+    for i, data in enumerate(dataloader):
+        inputs, labels = data
 
-            # Zero your gradients for every batch!
-            optimizer.zero_grad()
+        # Zero your gradients for every batch!
+        optimizer.zero_grad()
 
-            outputs = model(inputs)
+        outputs = model(inputs)
 
-            loss = loss_fn(outputs, labels)
-            loss.backward()
+        loss = loss_fn(outputs, labels)
+        loss.backward()
 
-            # Adjust learning weights
-            optimizer.step()
+        # Adjust learning weights
+        optimizer.step()
 
-            run.log({"loss": loss})
+        run.log({"loss": loss})
+        print(f"Step:\t{i}\tLoss:\t{loss:.3}")
+
+        if sync_tensorboard:
             writer.add_scalar("training loss", loss, i)
 
+    if sync_tensorboard:
         writer.close()
-        run.finish()
+    run.finish()
 
 
-def main() -> None:
+def main(args) -> None:
     # Construct our model by instantiating the class defined above
     model = Net()
 
-    dataloader = DataLoader(CustomDataset(), batch_size=64, shuffle=True)
+    dataloader = DataLoader(
+        CustomDataset(args.data_size), batch_size=args.batch, shuffle=True
+    )
 
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    train(model, optimizer, loss_fn, dataloader)
+    train(model, optimizer, loss_fn, dataloader, args.tensorboard)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--data-size",
+        default=60_000,
+        type=int,
+        help="Total dataset size",
+    )
+    parser.add_argument(
+        "-b",
+        "--batch",
+        default=128,
+        type=int,
+        help="Batch size",
+    )
+    parser.add_argument(
+        "-tb",
+        "--tensorboard",
+        action="store_true",
+        help="Add TensorBoard syncing",
+    )
+    args = parser.parse_args()
+
+    main(args)
