@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from pathlib import Path
+import os
 from typing import List
 
 import keras
@@ -38,13 +38,13 @@ def get_dataset(data_size):
 def main(args):
 
     run = wandb.init(sync_tensorboard=args.tensorboard)
+    run_path = run.path
 
     callbacks: List = []
     if args.tensorboard:
-        log_dir = Path().cwd() / "wandb" / "runs"  # TODO clear this directory
         callbacks.append(
             tf.keras.callbacks.TensorBoard(
-                log_dir=log_dir, update_freq="batch"
+                log_dir=run.dir, update_freq="batch"
             )
         )
 
@@ -66,6 +66,19 @@ def main(args):
 
     run.finish()
 
+    if not os.environ.get("WB_UAT_SKIP_CHECK"):
+        check(run_path, tensorboard=args.tensorboard)
+
+
+def check(run_path, tensorboard=False):
+    api = wandb.Api()
+    api_run = api.run(run_path)
+    assert api_run.summary["loss"] >= 0
+    assert api_run.state == "finished"
+    if tensorboard:
+        assert api_run.summary["train/epoch_loss"] >= 0
+        assert api_run.summary["global_step"] > 0
+
 
 if __name__ == "__main__":
 
@@ -86,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-e",
         "--epochs",
-        default=3,
+        default=2,
         type=int,
         help="Number of epochs",
     )

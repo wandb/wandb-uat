@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import tempfile
 
 import numpy as np
@@ -9,6 +10,7 @@ from PIL import Image
 
 def main():
     run = wandb.init()
+    run_path = run.path
 
     np_image = np.random.randint(0, high=256, size=(32, 32, 3))
     run.log({"np_image": wandb.Image(np_image)})
@@ -21,6 +23,18 @@ def main():
         run.log({"path_image": wandb.Image(tmp.name)})
 
     run.finish()
+
+    if not os.environ.get("WB_UAT_SKIP_CHECK"):
+        check(run_path)
+
+
+def check(run_path):
+    api = wandb.Api()
+    api_run = api.run(run_path)
+    assert api_run.summary["np_image"]["_type"] == "image-file"
+    assert api_run.summary["path_image"]["_type"] == "image-file"
+    assert api_run.summary["pil_image"]["_type"] == "image-file"
+    assert api_run.state == "finished"
 
 
 if __name__ == "__main__":

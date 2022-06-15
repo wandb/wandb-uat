@@ -7,6 +7,6 @@ if __name__ == "__main__":
     from types import SimpleNamespace
 
     args = SimpleNamespace(
-        data_size=60_000, batch=128, epochs=3, tensorboard=True
+        data_size=60_000, batch=128, epochs=2, tensorboard=True
     )
     main(args)
