@@ -5,6 +5,16 @@ PASSED=()
 FAILED=()
 SKIPS=()
 
+usage () {
+  echo "Usage: $* [OPTIONS] [ARGS]..."
+  echo "Options:"
+  echo "  --help             Show this message"
+  echo "  --skip-media       Skip media tests"
+  echo "  --skip-torch       Skip pytorch tests"
+  echo "  --skip-keras       Skip keras tests"
+  echo "  --skip-tensorflow  Skip tensorflow tests"
+}
+
 while [[ $# -gt 0 ]]; do
   case $1 in
     --all)
@@ -27,8 +37,13 @@ while [[ $# -gt 0 ]]; do
       SKIPS+=("^tests/05-keras/")
       shift
       ;;
+    --help)
+      usage
+      exit 1
+      ;;
     --*)
-      echo "ERROR: unknown option"
+      echo "ERROR: unknown option: $1"
+      usage
       exit 1
       ;;
     *)
@@ -42,7 +57,7 @@ done
 if  [ ${#ARGS[@]} -ne 0 ]; then
   TESTS=${ARGS[@]}
 else
-  TESTS="tests/*/*.py"
+  TESTS="tests/*/*.py tests/*/*.sh"
 fi
 
 for t in $TESTS; do
@@ -56,7 +71,10 @@ for t in $TESTS; do
   if [ $skip -ne 0 ]; then
     continue
   fi
-  python $t
+
+  echo ""
+  echo "# Running: $t"
+  $t
   R=$?
   if [ $R -ne 0 ]; then
     FAILED+=("$t")
