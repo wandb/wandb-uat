@@ -1,10 +1,13 @@
+#!/usr/bin/env python
+
 from typing import Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import wandb
 from torch.utils.data import DataLoader, Dataset
+
+import wandb
 
 
 class Net(nn.Module):

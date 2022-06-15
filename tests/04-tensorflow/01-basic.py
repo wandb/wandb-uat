@@ -1,12 +1,15 @@
+#!/usr/bin/env python
+
 import numpy as np
 import tensorflow as tf
-import wandb
 from tensorflow import keras
+
+import wandb
 
 
 class MyModel(keras.Model):
     def __init__(self):
-        super(MyModel, self).__init__()
+        super().__init__()
         self.conv1 = keras.layers.Conv2D(32, 3, activation="relu")
         self.flatten = keras.layers.Flatten()
         self.d1 = keras.layers.Dense(128, activation="relu")

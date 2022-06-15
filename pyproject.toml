@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+| __pycache__
+| .pyc
+'''
+
+[tool.isort]
+profile = "black"
