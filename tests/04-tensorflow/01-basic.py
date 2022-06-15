@@ -4,9 +4,6 @@ import argparse
 import sys
 from pathlib import Path
 
-if not sys.modules.get("tensorflow"):
-    sys.exit(0)
-
 import numpy as np
 import tensorflow as tf
 import wandb

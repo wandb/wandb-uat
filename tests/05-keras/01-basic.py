@@ -5,9 +5,6 @@ import sys
 from pathlib import Path
 from typing import List
 
-if not sys.modules.get("keras"):
-    sys.exit(0)
-
 import keras
 import numpy as np
 import tensorflow as tf
