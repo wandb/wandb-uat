@@ -11,8 +11,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 import wandb
 
-import wandb
-
 
 class Net(nn.Module):
     def __init__(self) -> None:
