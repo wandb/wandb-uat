@@ -57,7 +57,7 @@ done
 if  [ ${#ARGS[@]} -ne 0 ]; then
   TESTS=${ARGS[@]}
 else
-  TESTS="tests/*/*.py"
+  TESTS="tests/*/*.py tests/*/*.sh"
 fi
 
 for t in $TESTS; do
@@ -71,7 +71,10 @@ for t in $TESTS; do
   if [ $skip -ne 0 ]; then
     continue
   fi
-  python $t
+
+  echo ""
+  echo "# Running: $t"
+  $t
   R=$?
   if [ $R -ne 0 ]; then
     FAILED+=("$t")
