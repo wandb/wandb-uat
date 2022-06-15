@@ -1,10 +1,13 @@
+import tempfile
 from typing import Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import wandb
 from torch.utils.data import DataLoader, Dataset
+from torch.utils.tensorboard import SummaryWriter
+
+import wandb
 
 
 class Net(nn.Module):
@@ -48,25 +51,30 @@ def train(
     dataloader: DataLoader,
 ) -> None:
 
-    run = wandb.init()
+    run = wandb.init(sync_tensorboard=True)
 
-    for data in dataloader:
-        inputs, labels = data
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        writer = SummaryWriter(tmp_dir)
 
-        # Zero your gradients for every batch!
-        optimizer.zero_grad()
+        for i, data in enumerate(dataloader):
+            inputs, labels = data
 
-        outputs = model(inputs)
+            # Zero your gradients for every batch!
+            optimizer.zero_grad()
 
-        loss = loss_fn(outputs, labels)
-        loss.backward()
+            outputs = model(inputs)
 
-        # Adjust learning weights
-        optimizer.step()
+            loss = loss_fn(outputs, labels)
+            loss.backward()
 
-        run.log({"loss": loss})
+            # Adjust learning weights
+            optimizer.step()
 
-    run.finish()
+            run.log({"loss": loss})
+            writer.add_scalar("training loss", loss, i)
+
+        writer.close()
+        run.finish()
 
 
 def main() -> None:
