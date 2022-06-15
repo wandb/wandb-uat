@@ -29,7 +29,7 @@ def get_model():
 
 def get_dataset(data_size):
     images = np.random.rand(data_size, 28, 28, 1)
-    labels = keras.utils.to_categorical(
+    labels = tf.keras.utils.to_categorical(
         np.random.randint(0, high=10, size=(data_size,)), 10
     )
 
