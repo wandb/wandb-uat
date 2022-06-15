@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from pathlib import Path
+import os
 
 import numpy as np
 import tensorflow as tf
@@ -64,10 +64,10 @@ def main(args):
     )
 
     run = wandb.init(sync_tensorboard=args.tensorboard)
+    run_path = run.path
 
     if args.tensorboard:
-        log_dir = Path().cwd() / "wandb" / "runs"  # TODO clear this directory
-        writer = tf.summary.create_file_writer(str(log_dir))
+        writer = tf.summary.create_file_writer(run.dir)
 
     for i, (images, labels) in enumerate(dataset):
         train_step(
@@ -83,17 +83,28 @@ def main(args):
             f"Step:\t{i}\tLoss:\t{train_loss.result().numpy():.3}"
             f"\tAccuracy:\t{train_accuracy.result().numpy():.3}"
         )
-        run.log({"mean_loss": train_loss.result().numpy()})
-        run.log({"acc": train_accuracy.result().numpy()})
+        run.log({"loss": train_loss.result().numpy()})
 
         if args.tensorboard:
             with writer.as_default():
-                tf.summary.scalar("loss", train_loss.result(), i)
-                tf.summary.scalar("accuracy", train_accuracy.result(), step=i)
+                tf.summary.scalar("training loss", train_loss.result(), i)
 
-    run.finish()
     if args.tensorboard:
         writer.close()
+    run.finish()
+
+    if not os.environ.get("WB_UAT_SKIP_CHECK"):
+        check(run_path, tensorboard=args.tensorboard)
+
+
+def check(run_path, tensorboard=False):
+    api = wandb.Api()
+    api_run = api.run(run_path)
+    assert api_run.summary["loss"] >= 0
+    assert api_run.state == "finished"
+    if tensorboard:
+        assert api_run.summary["training loss"] >= 0
+        assert api_run.summary["global_step"] > 0
 
 
 if __name__ == "__main__":
