@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
+import sys
 from pathlib import Path
 from typing import List
-
-import sys
 
 if not sys.modules.get("keras"):
     sys.exit(0)
