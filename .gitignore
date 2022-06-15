@@ -130,3 +130,7 @@ dmypy.json
 
 # ignore local wandb dir
 /wandb/
+
+# ignore yea testing files
+/test-results/
+/.yea_cache/

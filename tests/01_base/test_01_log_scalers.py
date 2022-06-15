@@ -20,6 +20,7 @@ def check(project, run_id):
     api = wandb.Api()
     api_run = api.run(f"{project}/{run_id}")
     assert api_run.summary["m1"] == 1
+    assert api_run.state == "finished"
 
 
 if __name__ == "__main__":
