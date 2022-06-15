@@ -101,7 +101,6 @@ class CLI:
             self.config.instance_name,
             "--command",
             "git clone https://github.com/wandb/wandb-uat.git;"
-            "cd wandb-uat; git checkout nightly;"
             "docker run --gpus all --rm -v ~/wandb-uat:/workspace "
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
             f"{self.config.docker_image_name} "
