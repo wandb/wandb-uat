@@ -78,6 +78,7 @@ class CLI:
                     ],
                     input=b"Y\n",
                 )
+                self.print("GPU driver installed")
                 break
             except subprocess.CalledProcessError:
                 # allow some time for the VM to boot
@@ -100,11 +101,11 @@ class CLI:
             "ssh",
             self.config.instance_name,
             "--command",
-            "git clone https://github.com/wandb/wandb-uat.git;"
+            "git clone https://github.com/wandb/wandb-uat.git; "
             "docker run --gpus all --rm -v ~/wandb-uat:/workspace "
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
             f"{self.config.docker_image_name} "
-            "pip install wandb && ./bin/test.sh",
+            "./bin/test.sh",
         ]
         self.print(" ".join(cmd))
         subprocess.run(cmd)
