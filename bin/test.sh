@@ -57,7 +57,7 @@ done
 if  [ ${#ARGS[@]} -ne 0 ]; then
   TESTS=${ARGS[@]}
 else
-  TESTS="tests/*/*.py tests/*/*.sh"
+  TESTS="tests/*/test_*.py tests/*/test_*.sh"
 fi
 
 for t in $TESTS; do
