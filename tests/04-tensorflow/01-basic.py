@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 from pathlib import Path
 import sys
@@ -42,9 +44,13 @@ def train_step(
 
 def get_dataset(size: int, batch: int):
     images = np.random.rand(size, 28, 28, 1)
-    labels = keras.utils.to_categorical(np.random.randint(0, high=10, size=(size,)), 10)
+    labels = keras.utils.to_categorical(
+        np.random.randint(0, high=10, size=(size,)), 10
+    )
     return (
-        tf.data.Dataset.from_tensor_slices((images, labels)).shuffle(size).batch(batch)
+        tf.data.Dataset.from_tensor_slices((images, labels))
+        .shuffle(size)
+        .batch(batch)
     )
 
 
