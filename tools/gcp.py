@@ -23,7 +23,7 @@ class Config:
     vm_image_name: str = "nvidia-gpu-cloud-image-pytorch-20220228"
     docker_image_name: str = "nvcr.io/nvidia/pytorch:22.02-py3"
     python_version: str = "3.8"
-    git_branch: str = "nightly"
+    git_branch: str = "main"
 
 
 class CLI:
@@ -68,20 +68,21 @@ class CLI:
 
         # Agree to NVIDIA's prompt and install the GPU driver
         for _ in range(6):
-            try:
-                subprocess.run(
-                    [
-                        "gcloud",
-                        "compute",
-                        "ssh",
-                        self.config.instance_name,
-                    ],
-                    input=b"Y\n",
-                )
+            p = subprocess.run(
+                [
+                    "gcloud",
+                    "compute",
+                    "ssh",
+                    self.config.instance_name,
+                ],
+                input=b"Y\n",
+            )
+            if p.returncode == 0:
                 self.print("GPU driver installed")
                 break
-            except subprocess.CalledProcessError:
+            else:
                 # allow some time for the VM to boot
+                self.print("Waiting for VM to boot...")
                 time.sleep(10)
 
     def run_user_acceptance_tests(self):
