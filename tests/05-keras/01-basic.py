@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 from pathlib import Path
+import sys
+
+if not sys.modules.get("keras"):
+    sys.exit(0)
 
 import keras
 import numpy as np

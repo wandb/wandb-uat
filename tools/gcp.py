@@ -1,6 +1,7 @@
 import argparse
 import os
 import subprocess
+import time
 from dataclasses import dataclass, fields
 
 # from typing import Literal, get_args
@@ -66,17 +67,33 @@ class CLI:
         subprocess.run(cmd)
 
         # Agree to NVIDIA's prompt and install the GPU driver
-        subprocess.run(
-            [
-                "gcloud",
-                "compute",
-                "ssh",
-                self.config.instance_name,
-            ],
-            input=b"Y\n",
-        )
+        for _ in range(6):
+            try:
+                subprocess.run(
+                    [
+                        "gcloud",
+                        "compute",
+                        "ssh",
+                        self.config.instance_name,
+                    ],
+                    input=b"Y\n",
+                )
+                break
+            except subprocess.CalledProcessError:
+                # allow some time for the VM to boot
+                time.sleep(10)
 
     def run_user_acceptance_tests(self):
+        """
+        Run the user acceptance tests:
+          - ssh into the VM
+          - clone the wandb-uat repo
+          - spin up a container from the image that comes with the VMI
+            - pass the api key to the container
+            - pip install wandb
+            - run the tests
+        :return:
+        """
         cmd = [
             "gcloud",
             "compute",
@@ -88,7 +105,7 @@ class CLI:
             "docker run --gpus all --rm -v ~/wandb-uat:/workspace "
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
             f"{self.config.docker_image_name} "
-            "./bin/test.sh",
+            "pip install wandb && ./bin/test.sh",
         ]
         self.print(" ".join(cmd))
         subprocess.run(cmd)

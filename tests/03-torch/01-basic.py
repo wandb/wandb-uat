@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 import tempfile
 from typing import Tuple
+
+if not sys.modules.get("torch"):
+    sys.exit(0)
 
 import torch
 import torch.nn as nn
