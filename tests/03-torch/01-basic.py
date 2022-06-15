@@ -5,9 +5,6 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
-if not sys.modules.get("torch"):
-    sys.exit(0)
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
