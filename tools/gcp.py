@@ -2,7 +2,8 @@ import argparse
 import os
 import subprocess
 from dataclasses import dataclass, fields
-from typing import Literal, get_args
+
+# from typing import Literal, get_args
 
 
 @dataclass
@@ -18,7 +19,8 @@ class Config:
     container_registry: str = "gcr.io"
     gcp_project_id: str = "wandb-client-cicd"
     project: str = "nvidia-ngc-public"
-    image_name: str = "nvidia-gpu-cloud-image-pytorch-20220228"
+    vm_image_name: str = "nvidia-gpu-cloud-image-pytorch-20220228"
+    docker_image_name: str = "nvcr.io/nvidia/pytorch:22.02-py3"
     python_version: str = "3.8"
     git_branch: str = "nightly"
 
@@ -50,13 +52,15 @@ class CLI:
             "--maintenance-policy",
             self.config.maintenance_policy,
             "--image",
-            f"projects/{self.config.project}/global/images/{self.config.image_name}",
+            f"projects/{self.config.project}/global/images/"
+            f"{self.config.vm_image_name}",
             "--boot-disk-size",
             self.config.disk_size,
             "--boot-disk-type",
             self.config.disk_type,
             "--accelerator",
-            f"type={self.config.accelerator_type},count={self.config.accelerator_count}",
+            f"type={self.config.accelerator_type},"
+            f"count={self.config.accelerator_count}",
         ]
         self.print(" ".join(cmd))
         subprocess.run(cmd)
@@ -68,26 +72,25 @@ class CLI:
                 "compute",
                 "ssh",
                 self.config.instance_name,
-                # "--command",
-                # "sudo nvidia-smi",
             ],
             input=b"Y\n",
         )
 
     def run_user_acceptance_tests(self):
-        subprocess.run(
-            [
-                "gcloud",
-                "compute",
-                "ssh",
-                self.config.instance_name,
-                "--command",
-                # "git clone https://github.com/wandb/wandb-uat.git"
-                f"export WANDB_API_KEY={os.environ.get('WANDB_API_KEY')};"
-                "cd wandb-uat;"
-                "./bin/test.sh",
-            ]
-        )
+        cmd = [
+            "gcloud",
+            "compute",
+            "ssh",
+            self.config.instance_name,
+            "--command",
+            # "git clone https://github.com/wandb/wandb-uat.git;"
+            "docker run --gpus all --rm -v ~/wandb-uat:/workspace "
+            f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
+            f"{self.config.docker_image_name} "
+            "./bin/test.sh",
+        ]
+        self.print(" ".join(cmd))
+        subprocess.run(cmd)
 
     def delete_vm(self):
         subprocess.run(
@@ -100,9 +103,6 @@ class CLI:
                 "--quiet",
             ]
         )
-
-    # docker pull nvcr.io/nvidia/pytorch:22.05-py3
-    # docker run --gpus all -it --rm -v local_dir:container_dir nvcr.io/nvidia/pytorch:<xx.xx>-py3 <command>
 
 
 if __name__ == "__main__":
