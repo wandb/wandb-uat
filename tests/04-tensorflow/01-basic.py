@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from pathlib import Path
+
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -32,10 +34,8 @@ def train_step(
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-    loss = train_loss(loss)
-    acc = train_accuracy(labels, predictions)
-    # print(f"loss: {loss}, acc: {acc}")
-    return loss, acc
+    train_loss(loss)
+    train_accuracy(labels, predictions)
 
 
 def train():
@@ -47,7 +47,7 @@ def train():
         np.random.randint(0, high=10, size=(60000,)), 10
     )
     train_ds = (
-        tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(10000).batch(64)
+        tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(60000).batch(64)
     )
 
     loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
@@ -55,16 +55,33 @@ def train():
     train_loss = tf.keras.metrics.Mean(name="train_loss")
     train_accuracy = tf.keras.metrics.CategoricalAccuracy(name="train_accuracy")
 
-    run = wandb.init()
+    run = wandb.init(sync_tensorboard=True)
 
-    for images, labels in train_ds:
-        loss, acc = train_step(
-            model, images, labels, loss_object, optimizer, train_loss, train_accuracy
+    path = Path().cwd() / "runs"  # TODO clear this directory
+    writer = tf.summary.create_file_writer(path.name)
+
+    for i, (images, labels) in enumerate(train_ds):
+        train_step(
+            model,
+            images,
+            labels,
+            loss_object,
+            optimizer,
+            train_loss,
+            train_accuracy,
         )
-        run.log({"mean_loss": loss.numpy()})
-        run.log({"acc": acc.numpy()})
+        print(
+            f"Step:\t{i}\tLoss:\t{train_loss.result().numpy():.3}\tAccuracy:\t{train_accuracy.result().numpy():.3}"
+        )
+        run.log({"mean_loss": train_loss.result().numpy()})
+        run.log({"acc": train_accuracy.result().numpy()})
+
+        with writer.as_default():
+            tf.summary.scalar("loss", train_loss.result(), i)
+            tf.summary.scalar("accuracy", train_accuracy.result(), step=i)
 
     run.finish()
+    writer.close()
 
 
 if __name__ == "__main__":

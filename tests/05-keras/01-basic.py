@@ -1,15 +1,22 @@
 #!/usr/bin/env python
+from pathlib import Path
 
 import keras
 import numpy as np
-
+import tensorflow as tf
 import wandb
 from wandb.keras import WandbCallback
 
 
 def main():
 
-    run = wandb.init()
+    run = wandb.init(sync_tensorboard=True)
+
+    log_dir = Path().cwd() / "runs"  # TODO clear this directory
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=log_dir, update_freq="batch"
+    )
+
     model = keras.Sequential(
         [
             keras.Input(shape=(28, 28, 1)),
@@ -35,8 +42,7 @@ def main():
         y_train,
         batch_size=128,
         epochs=3,
-        validation_split=0.1,
-        callbacks=[WandbCallback()],
+        callbacks=[tensorboard_callback, WandbCallback(monitor="accuracy")],
     )
 
     run.finish()
