@@ -2,7 +2,8 @@
 
 import argparse
 import os
-from typing import Tuple
+import types
+from typing import Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -54,8 +55,10 @@ def train(
     sync_tensorboard: bool,
 ) -> str:
 
-    run = wandb.init(sync_tensorboard=sync_tensorboard)
-    run_path = run.path
+    run: wandb.sdk.wandb_run.Run = wandb.init(
+        sync_tensorboard=sync_tensorboard
+    )
+    run_path: str = run.path
 
     if sync_tensorboard:
         writer = SummaryWriter(run.dir)
@@ -87,7 +90,7 @@ def train(
     return run_path
 
 
-def main(args) -> None:
+def main(args: Union[argparse.Namespace, types.SimpleNamespace]) -> None:
     # Construct our model by instantiating the class defined above
     model = Net()
 
@@ -103,7 +106,7 @@ def main(args) -> None:
         check(run_path, tensorboard=args.tensorboard)
 
 
-def check(run_path, tensorboard=False):
+def check(run_path: str, tensorboard: bool = False) -> None:
     api = wandb.Api()
     api_run = api.run(run_path)
     assert api_run.summary["loss"] >= 0

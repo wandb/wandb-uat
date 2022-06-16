@@ -2,7 +2,8 @@
 
 import argparse
 import os
-from typing import List
+import types
+from typing import List, Tuple, Union
 
 import keras
 import numpy as np
@@ -11,7 +12,7 @@ import wandb
 from wandb.keras import WandbCallback
 
 
-def get_model():
+def get_model() -> keras.Model:
     return keras.Sequential(
         [
             keras.Input(shape=(28, 28, 1)),
@@ -26,16 +27,16 @@ def get_model():
     )
 
 
-def get_dataset(data_size):
+def get_dataset(data_size: int) -> Tuple[np.ndarray, np.ndarray]:
     images = np.random.rand(data_size, 28, 28, 1)
     labels = tf.keras.utils.to_categorical(
         np.random.randint(0, high=10, size=(data_size,)), 10
     )
 
-    return (images, labels)
+    return images, labels
 
 
-def main(args):
+def main(args: Union[argparse.Namespace, types.SimpleNamespace]) -> None:
 
     run = wandb.init(sync_tensorboard=args.tensorboard)
     run_path = run.path
@@ -70,7 +71,7 @@ def main(args):
         check(run_path, tensorboard=args.tensorboard)
 
 
-def check(run_path, tensorboard=False):
+def check(run_path: str, tensorboard: bool = False) -> None:
     api = wandb.Api()
     api_run = api.run(run_path)
     assert api_run.summary["loss"] >= 0
