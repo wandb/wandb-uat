@@ -102,7 +102,6 @@ jobs:
             python tools/gcp.py create_vm -v \
               --instance_name=gcp-<<parameters.framework>> \
               --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>>
-            echo Y | gcloud compute ssh gcp-<<parameters.framework>>
 
   delete_vm_gcp:
     parameters:
