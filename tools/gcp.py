@@ -1,8 +1,7 @@
 import argparse
 import os
 import subprocess
-
-# import time
+import time
 from dataclasses import dataclass, fields
 
 
@@ -84,42 +83,46 @@ class CLI:
         self.print(" ".join(cmd))
         p = subprocess.run(cmd)
 
-        # Agree to NVIDIA's prompt and install the GPU driver
-        # for _ in range(6):
-        #     # run the yes command and pipe its output to the next command
-        #     # yes = subprocess.Popen(
-        #     #     ["echo", "Y"],
-        #     #     stdout=subprocess.PIPE,
-        #     #     stderr=subprocess.PIPE,
-        #     # )
-        #     """
-        #     gpu_check
-        #     install_driver
-        #     enable_persistence_mode
-        #     install_nv_peer_mem
-        #     """
-        #     p = subprocess.run(
-        #         [
-        #             "gcloud",
-        #             "compute",
-        #             "ssh",
-        #             self.config.instance_name,
-        #             "--command",
-        #             "echo Y",
-        #         ],
-        #         input=b"Y\r\n",
-        #         # stdin=yes.stdout,
-        #     )
-        #     # yes.wait()
-        #     # import signal
-        #     # yes.send_signal(signal.SIGINT)
-        #     if p.returncode == 0:
-        #         self.print("GPU driver installed")
-        #         break
-        #     else:
-        #         # allow some time for the VM to boot
-        #         self.print("Waiting for VM to boot...")
-        #         time.sleep(10)
+        # Agree to NVIDIA's prompt and install the GPU driver.
+        # This monster below is here bc the yes command
+        # and a gazillion alternatives do not work on circleci.
+        # reverse-engineered from /usr/bin/gcp-ngc-login.sh
+        cmd = [
+            "gcloud",
+            "compute",
+            "ssh",
+            self.config.instance_name,
+            "--command",
+            "num_gpu=$(lspci -d '10de:*:0300' -s '.0' | wc -l); "
+            "echo $num_gpu; "
+            "source /etc/nvidia-vmi-version.txt; "
+            'REGISTRY="nvcr.io"; NVIDIA_DIR="/var/tmp/nvidia"; '
+            "sudo gsutil cp "
+            "gs://nvidia-ngc-drivers-us-public/TESLA/shim/NVIDIA-Linux-x86_64-"
+            "${NVIDIA_DRIVER_VERSION}-${NVIDIA_GCP_VERSION}-shim.run "
+            "${NVIDIA_DIR}; "
+            "sudo chmod u+x ${NVIDIA_DIR}/NVIDIA-Linux-x86_64-"
+            "${NVIDIA_DRIVER_VERSION}-${NVIDIA_GCP_VERSION}-shim.run; "
+            "sudo ${NVIDIA_DIR}/NVIDIA-Linux-x86_64-${NVIDIA_DRIVER_VERSION}-"
+            "${NVIDIA_GCP_VERSION}-shim.run --no-cc-version-check "
+            "--kernel-module-only --silent --dkms; "
+            "sudo dkms add nvidia/${NVIDIA_DRIVER_VERSION} || true; "
+            "cd /usr/share/doc/NVIDIA_GLX-1.0/samples/; "
+            "sudo tar xvjf nvidia-persistenced-init.tar.bz2; "
+            "sudo nvidia-persistenced-init/install.sh && "
+            "sudo rm -rf nvidia-persistenced-init; ",
+        ]
+        self.print(cmd)
+        for _ in range(6):
+            p = subprocess.run(cmd)
+            # input=b"Y\r\n"
+            if p.returncode == 0:
+                self.print("GPU driver installed")
+                break
+            else:
+                # allow some time for the VM to boot
+                self.print("Waiting for VM to boot...")
+                time.sleep(10)
 
         return p.returncode
 
