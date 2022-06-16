@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import subprocess
+import sys
 import time
 from dataclasses import dataclass, fields
 
@@ -171,6 +172,8 @@ class CLI:
         output = p.stdout.decode()
         self.print(output)
 
+        print(output.strip().endswith("Failed!"), p.returncode)
+
         return output.strip().endswith("Failed!")
 
     def delete_vm(self) -> int:
@@ -220,4 +223,5 @@ if __name__ == "__main__":
     v = arguments.pop("verbose")
 
     cli = CLI(config=Config(**arguments), verbose=v)
-    getattr(cli, command)()
+    exit_code = getattr(cli, command)()
+    sys.exit(exit_code)
