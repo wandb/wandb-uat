@@ -1,0 +1,20 @@
+version: 2.1
+
+jobs:
+  lint:
+    docker:
+      - image: "python:3.8"
+    steps:
+      - checkout
+      - run:
+          name: "Lint sources"
+          command: |
+            pip install black flake8 mypy
+            black --check **/*.py
+            flake8 **/*.py
+            mypy **/*.py
+
+workflows:
+  lint:
+    jobs:
+      - lint
