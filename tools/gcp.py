@@ -92,7 +92,7 @@ class CLI:
                     "ssh",
                     self.config.instance_name,
                 ],
-                input=b"Y\n",
+                input=b"Y\r\n",
             )
             if p.returncode == 0:
                 self.print("GPU driver installed")
