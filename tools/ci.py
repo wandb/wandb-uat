@@ -2,14 +2,19 @@ import argparse
 import os
 import subprocess
 import time
+from typing import List, Optional, Tuple
 
-import requests
+import requests  # type: ignore
 
 
 CIRCLECI_API_TOKEN = "CIRCLECI_TOKEN"
 
 
-def poll(args, pipeline_id=None, workflow_ids=None):
+def poll(
+    args: argparse.Namespace,
+    pipeline_id: Optional[str] = None,
+    workflow_ids: Optional[List[str]] = None,
+) -> None:
     """
     Poll the CircleCI API for the status of the pipeline.
     borrowed from wandb/wandb
@@ -20,6 +25,8 @@ def poll(args, pipeline_id=None, workflow_ids=None):
     :return:
     """
     print(f"Waiting for pipeline to complete (Branch: {args.branch})...")
+    if workflow_ids is None:
+        workflow_ids = []
     while True:
         num = 0
         done = 0
@@ -48,7 +55,7 @@ def poll(args, pipeline_id=None, workflow_ids=None):
         time.sleep(20)
 
 
-def trigger(args):
+def trigger(args: argparse.Namespace) -> None:
     """
     Trigger a nightly UAT run on CircleCI
 
@@ -57,6 +64,7 @@ def trigger(args):
     """
     url = "https://circleci.com/api/v2/project/gh/wandb/wandb-uat/pipeline"
     default_shards = "cpu,gpu,tpu,local"
+    # default_clouds = "gcp,aws,azure"
 
     default_shards_set = set(default_shards.split(","))
     requested_shards_set = (
@@ -99,7 +107,7 @@ def trigger(args):
         poll(args, pipeline_id=uuid)
 
 
-def process_args():
+def process_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser = argparse.ArgumentParser()
 
     subparsers = parser.add_subparsers(
@@ -132,13 +140,13 @@ def process_args():
     return parser, args
 
 
-def process_environment(args):
+def process_environment(args: argparse.Namespace) -> None:
     api_token = os.environ.get(CIRCLECI_API_TOKEN)
     assert api_token, f"Set environment variable: {CIRCLECI_API_TOKEN}"
     args.api_token = api_token
 
 
-def process_workspace(args):
+def process_workspace(args: argparse.Namespace) -> None:
     branch = args.branch
     if not branch:
         code, branch = subprocess.getstatusoutput("git branch --show-current")
@@ -146,7 +154,7 @@ def process_workspace(args):
         args.branch = branch
 
 
-def main():
+def main() -> None:
     parser, args = process_args()
     process_environment(args)
     process_workspace(args)

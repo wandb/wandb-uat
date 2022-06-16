@@ -1,5 +1,38 @@
 version: 2.1
 
+orbs:
+  slack: circleci/slack@4.9.3
+  go: circleci/go@1.3.0
+  gke: circleci/gcp-gke@1.4.0
+
+parameters:
+  manual:
+    type: boolean
+    default: false
+  manual_nightly:
+    type: boolean
+    default: false
+  manual_nightly_slack_notify:
+    type: boolean
+    default: false
+  vm_image_tag:
+    type: string
+    default: 20220228
+  docker_tag:
+    type: string
+    default: 22.02
+
+commands:
+  setup_gcloud:
+    steps:
+      - run:
+          name: "Setup gcloud"
+          command: |
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            gcloud --quiet config set project $GOOGLE_PROJECT_ID
+            gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
+
 jobs:
   lint:
     docker:
@@ -14,7 +47,116 @@ jobs:
             flake8 .
             mypy .
 
+  slack_notify:
+    parameters:
+      message:
+        type: string
+        default: ":tada:"
+      execute:
+        type: boolean
+        default: true
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - when:
+          condition: << parameters.execute >>
+          steps:
+            - slack/notify:
+                custom: |
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "fields": [
+                          {
+                            "type": "plain_text",
+                            "text": "<< parameters.message >>",
+                            "emoji": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                event: always
+                channel: $SLACK_SDK_NIGHTLY_CI_CHANNEL
+      # this is to make sure `steps` is not empty
+      - run:
+          name: Print message to stdout
+          command: echo << parameters.message >>
+
+  create_vm_gcp:
+    parameters:
+      framework:
+        type: string
+    docker:
+      - image: "python:3.8"
+    steps:
+      - checkout
+      - go/install
+      - gke/install
+      - run:
+          name: "Update gcloud components"
+          command: gcloud --quiet components update
+      - setup_gcloud
+      - run:
+          name: "Create GCP VM"
+          command: |
+            python tools/gcp.py create_vm -v \
+              --instance_name=gcp-<<parameters.framework>> \
+              --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vmi_tag>>
+
+  delete_vm_gcp:
+    parameters:
+      framework:
+        type: string
+    docker:
+      - image: "cimg/base:stable"
+    steps:
+      - checkout
+      - go/install
+      - gke/install
+      - run:
+          name: "Update gcloud components"
+          command: gcloud --quiet components update
+      - setup_gcloud
+      - run:
+          name: "Delete GCP VM"
+          command: |
+            python tools/gcp.py delete_vm -v --instance_name=gcp-<<parameters.framework>>
+
 workflows:
   lint:
     jobs:
       - lint
+
+  nightly:
+#    when:
+#      and:
+#        - equal:
+#            - << pipeline.trigger_source >>
+#            - scheduled_pipeline
+#        - equal:
+#            - << pipeline.schedule.name >>
+#            - "nightly"
+    jobs:
+      - slack_notify:
+          name: "slack-notify-on-start"
+          context: slack-secrets
+          message: ":nvidia: :runner: *Nightly NVIDIA UAT run started!*"
+      # manage vms
+      - create_vm_gcp:
+          matrix:
+            parameters:
+              framework: [ "tensorflow", "pytorch" ]
+          requires:
+            - "slack-notify-on-start"
+      - delete_vm_gcp:
+          requires:
+            - create_vm_gcp
+      # todo: run the tests
+      - slack_notify:
+          name: "slack-notify-on-finish"
+          context: slack-secrets
+          requires:
+            - shut_down_cluster
+          message: ":nvidia: :checkered_flag: *Nightly NVIDIA UAT run finished!*"
