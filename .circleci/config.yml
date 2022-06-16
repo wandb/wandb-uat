@@ -31,6 +31,9 @@ commands:
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             gcloud --quiet config set project $GOOGLE_PROJECT_ID
             gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
+            ssh-keygen -b 2048 -t rsa -f ~/.ssh/google_compute_engine -q -N ""
+            gcloud compute config-ssh --remove
+            gcloud compute config-ssh --quiet
 
 jobs:
   lint:
@@ -99,9 +102,6 @@ jobs:
       - run:
           name: "Create GCP VM"
           command: |
-            ssh-keygen -b 2048 -t rsa -f ~/.ssh/google_compute_engine -q -N ""
-            gcloud compute config-ssh --remove
-            gcloud compute config-ssh --quiet
             python tools/gcp.py create_vm -v \
               --instance_name=gcp-<<parameters.framework>> \
               --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>>
@@ -111,13 +111,13 @@ jobs:
       framework:
         type: string
     docker:
-      - image: "cimg/base:stable"
+      - image: "python:3.8"
     steps:
       - checkout
       - gke/install
-      - run:
-          name: "Update gcloud components"
-          command: gcloud --quiet components update
+#      - run:
+#          name: "Update gcloud components"
+#          command: gcloud --quiet components update
       - setup_gcloud
       - run:
           name: "Delete GCP VM"
