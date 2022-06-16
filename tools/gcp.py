@@ -81,7 +81,7 @@ class CLI:
             f"count={self.config.accelerator_count}",
         ]
         self.print(" ".join(cmd))
-        # p = subprocess.run(cmd)
+        p = subprocess.run(cmd)
 
         # Agree to NVIDIA's prompt and install the GPU driver.
         # This monster below is here bc the yes command
