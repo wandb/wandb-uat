@@ -70,7 +70,7 @@ def main(args: Union[argparse.Namespace, types.SimpleNamespace]) -> None:
         name="train_accuracy"
     )
 
-    run = wandb.init(sync_tensorboard=args.tensorboard)
+    run = wandb.init(name=__file__, sync_tensorboard=args.tensorboard)
     run_path = run.path
 
     if args.tensorboard:

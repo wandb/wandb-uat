@@ -120,7 +120,6 @@ jobs:
       - run:
           name: "Delete GCP VM"
           command: |
-            WANDB_PROJECT=nvidia-$(date -u +%Y%m%d) \
             python tools/gcp.py delete_vm -v --instance_name=gcp-<<parameters.framework>>
 
   run_user_acceptance_tests_gcp:
@@ -142,6 +141,7 @@ jobs:
           name: "Run user acceptance tests"
           # todo: add skips for tests, specific to the other frameworks
           command: |
+            WANDB_PROJECT=nvidia-gcp-<<parameters.framework>>-$(date -u +%Y%m%d) \
             python tools/gcp.py run_user_acceptance_tests -v \
               --instance_name=gcp-<<parameters.framework>> \
               --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>> \

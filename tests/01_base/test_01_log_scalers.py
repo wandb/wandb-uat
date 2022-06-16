@@ -6,7 +6,7 @@ import wandb
 
 
 def main() -> None:
-    run = wandb.init()
+    run = wandb.init(name=__file__)
     run_path = run.path
     run.log(dict(m1=1))
     run.finish()

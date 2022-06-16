@@ -9,7 +9,7 @@ from PIL import Image
 
 
 def main() -> None:
-    run = wandb.init()
+    run = wandb.init(name=__file__)
     run_path = run.path
 
     np_image = np.random.randint(0, high=256, size=(32, 32, 3))

@@ -56,7 +56,7 @@ def train(
 ) -> str:
 
     run: wandb.sdk.wandb_run.Run = wandb.init(
-        sync_tensorboard=sync_tensorboard
+        name=__file__, sync_tensorboard=sync_tensorboard
     )
     run_path: str = run.path
 
