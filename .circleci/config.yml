@@ -10,9 +10,9 @@ jobs:
           name: "Lint sources"
           command: |
             pip install black flake8 mypy
-            black --check **/*.py
-            flake8 **/*.py
-            mypy **/*.py
+            black --check .
+            flake8 .
+            mypy .
 
 workflows:
   lint:
