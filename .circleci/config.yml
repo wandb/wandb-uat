@@ -148,11 +148,15 @@ workflows:
           matrix:
             parameters:
               framework: [ "tensorflow", "pytorch" ]
+          name: "create_vm_gcp_<<matrix.framework>>"
           requires:
             - "slack-notify-on-start"
       - delete_vm_gcp:
+          matrix:
+            parameters:
+              framework: [ "tensorflow", "pytorch" ]
           requires:
-            - create_vm_gcp
+            - "create_vm_gcp_<<matrix.framework>>"
       # todo: run the tests
       - slack_notify:
           name: "slack-notify-on-finish"
