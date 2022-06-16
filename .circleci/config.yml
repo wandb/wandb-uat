@@ -32,8 +32,8 @@ commands:
             gcloud --quiet config set project $GOOGLE_PROJECT_ID
             gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
             ssh-keygen -b 2048 -t rsa -f ~/.ssh/google_compute_engine -q -N ""
-            gcloud compute config-ssh --remove
-            gcloud compute config-ssh --quiet
+#            gcloud compute config-ssh --remove
+#            gcloud compute config-ssh --quiet
 
 jobs:
   lint:
