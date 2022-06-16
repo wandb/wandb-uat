@@ -92,9 +92,9 @@ jobs:
     steps:
       - checkout
       - gke/install
-      - run:
-          name: "Update gcloud components"
-          command: gcloud --quiet components update
+#      - run:
+#          name: "Update gcloud components"
+#          command: gcloud --quiet components update
       - setup_gcloud
       - run:
           name: "Create GCP VM"
