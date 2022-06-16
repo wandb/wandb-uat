@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from pathlib import Path
+import os
 from typing import Tuple
 
 import torch
@@ -52,15 +52,15 @@ def train(
     loss_fn: nn.Module,
     dataloader: DataLoader,
     sync_tensorboard: bool,
-) -> None:
+) -> str:
 
     run: wandb.sdk.wandb_run.Run = wandb.init(
         sync_tensorboard=sync_tensorboard
     )  # type: ignore
+    run_path = run.path
 
     if sync_tensorboard:
-        log_dir = Path().cwd() / "wandb" / "runs"  # TODO clear this directory
-        writer = SummaryWriter(log_dir)
+        writer = SummaryWriter(run.dir)
 
     for i, data in enumerate(dataloader):
         inputs, labels = data
@@ -86,6 +86,8 @@ def train(
         writer.close()
     run.finish()
 
+    return run_path
+
 
 def main(args) -> None:
     # Construct our model by instantiating the class defined above
@@ -98,7 +100,19 @@ def main(args) -> None:
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    train(model, optimizer, loss_fn, dataloader, args.tensorboard)
+    run_path = train(model, optimizer, loss_fn, dataloader, args.tensorboard)
+    if not os.environ.get("WB_UAT_SKIP_CHECK"):
+        check(run_path, tensorboard=args.tensorboard)
+
+
+def check(run_path, tensorboard=False):
+    api = wandb.Api()
+    api_run = api.run(run_path)
+    assert api_run.summary["loss"] >= 0
+    assert api_run.state == "finished"
+    if tensorboard:
+        assert api_run.summary["training loss"] >= 0
+        assert api_run.summary["global_step"] > 0
 
 
 if __name__ == "__main__":
