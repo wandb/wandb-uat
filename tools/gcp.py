@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import subprocess
 import time
@@ -26,10 +27,24 @@ class Config:
 
 
 class CLI:
-    def __init__(self, config: Config, verbose: bool = False) -> None:
+    def __init__(
+        self,
+        config: Config,
+        verbose: bool = False,
+        log_level: int = logging.INFO,
+    ) -> None:
         self.config = config
         self.verbose = verbose
 
+        self.logger = logging.getLogger(__name__)
+        handler = logging.FileHandler("gcp.log")
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+        )
+        self.logger.addHandler(handler)
+        self.logger.setLevel(log_level)
+
+        self.print("Initialized CLI")
         self.print(self.config)
 
     def print(  # type: ignore
@@ -39,6 +54,7 @@ class CLI:
         end: str = "\n",
         file=None,
     ) -> None:
+        self.logger.info(sep.join(map(str, args)))
         if self.verbose:
             print(*args, sep=sep, end=end, file=file)
 
@@ -144,12 +160,18 @@ class CLI:
             "git clone https://github.com/wandb/wandb-uat.git; "
             "docker run --gpus all --rm -v ~/wandb-uat:/workspace "
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
+            f"--env WANDB_PROJECT={os.environ.get('WANDB_PROJECT')} "
             f"{self.config.docker_image_name} "
-            '/bin/bash -c "pip install wandb[media] && ./bin/test.sh"',
+            f'/bin/bash -c "pip install wandb[media] && ./bin/test.sh"',
         ]
         self.print(" ".join(cmd))
-        p = subprocess.run(cmd)
-        return p.returncode
+        p = subprocess.run(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+        output = p.stdout.decode()
+        self.print(output)
+
+        return output.strip().endswith("Failed!")
 
     def delete_vm(self) -> int:
         """
