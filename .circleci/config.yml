@@ -11,6 +11,15 @@ parameters:
   slack_notify:
     type: boolean
     default: false
+  execute_gcp:
+    type: boolean
+    default: true
+  execute_aws:
+    type: boolean
+    default: false
+  execute_azure:
+    type: boolean
+    default: false
   vm_image_tag:
     type: string
     default: "20220228"

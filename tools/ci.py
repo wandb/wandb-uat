@@ -63,35 +63,37 @@ def trigger(args: argparse.Namespace) -> None:
     :return:
     """
     url = "https://circleci.com/api/v2/project/gh/wandb/wandb-uat/pipeline"
-    default_shards = "cpu,gpu,tpu,local"
-    # default_clouds = "gcp,aws,azure"
+    default_clouds = "gcp,aws,azure"
 
-    default_shards_set = set(default_shards.split(","))
-    requested_shards_set = (
-        set(args.shards.split(",")) if args.shards else default_shards_set
+    default_clouds_set = set(default_clouds.split(","))
+    requested_clouds_set = (
+        set(args.clouds.split(",")) if args.clouds else default_clouds_set
     )
 
     # check that all requested shards are valid and that there is at least one
-    if not requested_shards_set.issubset(default_shards_set):
+    if not requested_clouds_set.issubset(default_clouds_set):
         raise ValueError(
-            f"Requested invalid shards: {requested_shards_set}. "
-            f"Valid shards are: {default_shards_set}"
+            f"Requested invalid clouds: {requested_clouds_set}. "
+            f"Valid clouds are: {default_clouds_set}"
         )
-    # flip the requested shards to True
-    shards = {
-        f"manual_nightly_execute_shard_{shard}": True
-        for shard in requested_shards_set
+    # flip the requested clouds to True
+    clouds = {
+        f"execute_{cloud}": True if cloud in requested_clouds_set else False
+        for cloud in default_clouds_set
     }
+    if not any(clouds.values()):
+        raise ValueError(
+            f"Requested no clouds. Valid clouds are: {default_clouds_set}"
+        )
 
     payload = {
         "branch": args.branch,
         "parameters": {
             **{
                 "manual": True,
-                "manual_nightly": True,
-                "manual_nightly_slack_notify": args.slack_notify or False,
+                "slack_notify": args.slack_notify or False,
             },
-            **shards,
+            **clouds,
         },
     }
 
