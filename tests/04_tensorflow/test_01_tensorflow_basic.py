@@ -2,6 +2,8 @@
 
 import argparse
 import os
+import types
+from typing import Union
 
 import numpy as np
 import tensorflow as tf
@@ -10,24 +12,30 @@ from tensorflow import keras
 
 
 class MyModel(keras.Model):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.conv1 = keras.layers.Conv2D(32, 3, activation="relu")
         self.flatten = keras.layers.Flatten()
         self.d1 = keras.layers.Dense(128, activation="relu")
         self.d2 = keras.layers.Dense(10)
 
-    def call(self, x):
+    def call(self, x: np.ndarray) -> tf.Tensor:
         x = self.conv1(x)
         x = self.flatten(x)
         x = self.d1(x)
         return self.d2(x)
 
 
-@tf.function
+@tf.function  # type: ignore
 def train_step(
-    model, images, labels, loss_object, optimizer, train_loss, train_accuracy
-):
+    model: keras.Model,
+    images: np.ndarray,
+    labels: np.ndarray,
+    loss_object: tf.keras.losses.Loss,
+    optimizer: tf.keras.optimizers.Optimizer,
+    train_loss: tf.keras.metrics.Metric,
+    train_accuracy: tf.keras.metrics.Metric,
+) -> None:
     with tf.GradientTape() as tape:
         predictions = model(images, training=True)
         loss = loss_object(labels, predictions)
@@ -38,7 +46,7 @@ def train_step(
     train_accuracy(labels, predictions)
 
 
-def get_dataset(size: int, batch: int):
+def get_dataset(size: int, batch: int) -> tf.data.Dataset:
     images = np.random.rand(size, 28, 28, 1)
     labels = keras.utils.to_categorical(
         np.random.randint(0, high=10, size=(size,)), 10
@@ -50,12 +58,11 @@ def get_dataset(size: int, batch: int):
     )
 
 
-def main(args):
+def main(args: Union[argparse.Namespace, types.SimpleNamespace]) -> None:
     # Create an instance of the model
     model = MyModel()
 
     dataset = get_dataset(args.data_size, args.batch)
-
     loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     optimizer = tf.keras.optimizers.Adam()
     train_loss = tf.keras.metrics.Mean(name="train_loss")
@@ -97,7 +104,7 @@ def main(args):
         check(run_path, tensorboard=args.tensorboard)
 
 
-def check(run_path, tensorboard=False):
+def check(run_path: str, tensorboard: bool = False) -> None:
     api = wandb.Api()
     api_run = api.run(run_path)
     assert api_run.summary["loss"] >= 0

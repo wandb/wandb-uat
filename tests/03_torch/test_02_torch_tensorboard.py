@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from test_01_basic import main
+from test_01_torch_basic import main
 
 
 if __name__ == "__main__":

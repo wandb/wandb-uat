@@ -4,8 +4,6 @@ import subprocess
 import time
 from dataclasses import dataclass, fields
 
-# from typing import Literal, get_args
-
 
 @dataclass
 class Config:
@@ -27,21 +25,27 @@ class Config:
 
 
 class CLI:
-    def __init__(self, config: Config, verbose: bool = False):
+    def __init__(self, config: Config, verbose: bool = False) -> None:
         self.config = config
         self.verbose = verbose
 
         self.print(self.config)
 
-    def print(self, *args, sep=" ", end="\n", file=None):
+    def print(  # type: ignore
+        self,
+        *args,
+        sep: str = " ",
+        end: str = "\n",
+        file=None,
+    ) -> None:
         if self.verbose:
             print(*args, sep=sep, end=end, file=file)
 
     @staticmethod
-    def update_components():
+    def update_components() -> None:
         subprocess.run(["gcloud", "--quiet", "components", "update"])
 
-    def create_vm(self):
+    def create_vm(self) -> None:
         cmd = [
             "gcloud",
             "compute",
@@ -85,7 +89,7 @@ class CLI:
                 self.print("Waiting for VM to boot...")
                 time.sleep(10)
 
-    def run_user_acceptance_tests(self):
+    def run_user_acceptance_tests(self) -> None:
         """
         Run the user acceptance tests:
           - ssh into the VM
@@ -111,7 +115,7 @@ class CLI:
         self.print(" ".join(cmd))
         subprocess.run(cmd)
 
-    def delete_vm(self):
+    def delete_vm(self) -> None:
         subprocess.run(
             [
                 "gcloud",
