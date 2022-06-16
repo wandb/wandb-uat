@@ -162,5 +162,6 @@ workflows:
           name: "slack-notify-on-finish"
           context: slack-secrets
           requires:
-            - shut_down_cluster
+            - delete_vm_gcp_tensorflow
+            - delete_vm_gcp_pytorch
           message: ":nvidia: :checkered_flag: *Nightly NVIDIA UAT run finished!*"
