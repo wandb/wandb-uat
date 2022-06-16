@@ -87,7 +87,9 @@ class CLI:
         for _ in range(6):
             # run the yes command and pipe its output to the next command
             yes = subprocess.Popen(
-                ["yes"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                ["echo", "Y"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
             p = subprocess.run(
                 [
@@ -99,7 +101,9 @@ class CLI:
                 # input=b"Y\r\n",
                 stdin=yes.stdout,
             )
-            yes.wait()
+            # yes.wait()
+            # import signal
+            # yes.send_signal(signal.SIGINT)
             if p.returncode == 0:
                 self.print("GPU driver installed")
                 break
