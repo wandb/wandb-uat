@@ -4,8 +4,6 @@ import subprocess
 import time
 from dataclasses import dataclass, fields
 
-# from typing import Literal, get_args
-
 
 @dataclass
 class Config:
