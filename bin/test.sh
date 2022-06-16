@@ -22,19 +22,19 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --skip-media)
-      SKIPS+=("^tests/02-media/")
+      SKIPS+=("^tests/02_media/")
       shift
       ;;
     --skip-torch)
-      SKIPS+=("^tests/03-torch/")
+      SKIPS+=("^tests/03_torch/")
       shift
       ;;
     --skip-tensorflow)
-      SKIPS+=("^tests/04-tensorflow/")
+      SKIPS+=("^tests/04_tensorflow/")
       shift
       ;;
     --skip-keras)
-      SKIPS+=("^tests/05-keras/")
+      SKIPS+=("^tests/05_keras/")
       shift
       ;;
     --help)
