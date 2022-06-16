@@ -8,10 +8,7 @@ parameters:
   manual:
     type: boolean
     default: false
-  manual_nightly:
-    type: boolean
-    default: false
-  manual_nightly_slack_notify:
+  slack_notify:
     type: boolean
     default: false
   vm_image_tag:
@@ -192,19 +189,22 @@ workflows:
       - lint
 
   nightly:
-#    when:
-#      and:
-#        - equal:
-#            - << pipeline.trigger_source >>
-#            - scheduled_pipeline
-#        - equal:
-#            - << pipeline.schedule.name >>
-#            - "nightly"
+    when:
+      or:
+        - << pipeline.parameters.manual >>
+        - and:
+            - equal:
+                - << pipeline.trigger_source >>
+                - scheduled_pipeline
+            - equal:
+                - << pipeline.schedule.name >>
+                - "nightly"
     jobs:
       - slack_notify:
           name: "slack-notify-on-start"
           context: slack-secrets
           message: ":nvidia: :runner: *Nightly NVIDIA UAT run started!*"
+          execute: << pipeline.parameters.slack_notify >>
       # create vms on GCP
       - create_vm_gcp:
           matrix:
@@ -221,8 +221,8 @@ workflows:
           framework_tag: "tf2-py3"
           test_args: "--skip-torch"
           context: slack-secrets
-          notify_on_failure: true
-          notify_on_success: true
+          notify_on_failure: << pipeline.parameters.slack_notify >>
+          notify_on_success: << pipeline.parameters.slack_notify >>
           requires:
             - "create_vm_gcp_tensorflow"
       - user_acceptance_tests_gcp:
@@ -231,52 +231,7 @@ workflows:
           framework_tag: "py3"
           test_args: "--skip-keras --skip-tensorflow"
           context: slack-secrets
-          notify_on_failure: true
-          notify_on_success: true
+          notify_on_failure: << pipeline.parameters.slack_notify >>
+          notify_on_success: << pipeline.parameters.slack_notify >>
           requires:
             - "create_vm_gcp_pytorch"
-
-#  manual_nightly:
-#    when: << pipeline.parameters.manual_nightly >>
-#    jobs:
-#      - slack_notify:
-#          name: "slack-notify-on-start"
-#          context: slack-secrets
-#          message: ":nvidia: :runner: *Manual NVIDIA UAT run started!*"
-#      # create vms on GCP
-#      - create_vm_gcp:
-#          matrix:
-#            parameters:
-#              framework: [ "tensorflow", "pytorch" ]
-#          name: "create_vm_gcp_<<matrix.framework>>"
-#          requires:
-#            - "slack-notify-on-start"
-#      # run the user acceptance tests
-#      - run_user_acceptance_tests_gcp:
-#          name: "run_user_acceptance_tests_gcp_tensorflow"
-#          framework: tensorflow
-#          framework_tag: "tf2-py3"
-#          requires:
-#            - "create_vm_gcp_tensorflow"
-#      - run_user_acceptance_tests_gcp:
-#          name: "run_user_acceptance_tests_gcp_pytorch"
-#          framework: pytorch
-#          framework_tag: "py3"
-#          requires:
-#            - "create_vm_gcp_pytorch"
-#      # delete vms on GCP
-#      - delete_vm_gcp:
-#          matrix:
-#            parameters:
-#              framework: [ "tensorflow", "pytorch" ]
-#          name: "delete_vm_gcp_<<matrix.framework>>"
-#          requires:
-#            - "run_user_acceptance_tests_gcp_<<matrix.framework>>"
-#      # we're done, post on Slack
-#      - slack_notify:
-#          name: "slack-notify-on-finish"
-#          context: slack-secrets
-#          requires:
-#            - delete_vm_gcp_tensorflow
-#            - delete_vm_gcp_pytorch
-#          message: ":nvidia: :checkered_flag: *Manual NVIDIA UAT run finished!*"
