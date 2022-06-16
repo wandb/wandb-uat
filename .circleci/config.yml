@@ -17,10 +17,10 @@ parameters:
     default: false
   vm_image_tag:
     type: string
-    default: 20220228
+    default: "20220228"
   docker_tag:
     type: string
-    default: 22.02
+    default: "22.02"
 
 commands:
   setup_gcloud:
