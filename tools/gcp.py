@@ -25,6 +25,7 @@ class Config:
     docker_image_name: str = "nvcr.io/nvidia/pytorch:22.02-py3"
     python_version: str = "3.8"
     git_branch: str = "main"
+    test_args: str = "--all"
 
 
 class CLI:
@@ -163,18 +164,13 @@ class CLI:
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
             f"--env WANDB_PROJECT={os.environ.get('WANDB_PROJECT')} "
             f"{self.config.docker_image_name} "
-            f'/bin/bash -c "pip install wandb[media] && ./bin/test.sh"',
+            f'/bin/bash -c "pip install wandb[media] && '
+            f'./bin/test.sh {self.config.test_args}"',
         ]
         self.print(" ".join(cmd))
-        p = subprocess.run(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        )
-        output = p.stdout.decode()
-        self.print(output)
+        p = subprocess.run(cmd)
 
-        print(output.strip().endswith("Failed!"), p.returncode)
-
-        return output.strip().endswith("Failed!")
+        return p.returncode
 
     def delete_vm(self) -> int:
         """

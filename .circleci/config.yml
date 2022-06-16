@@ -128,6 +128,9 @@ jobs:
         type: string
       framework_tag:
         type: string
+      test_args:
+        type: string
+        default: "--all"
     docker:
       - image: "python:3.8"
     steps:
@@ -145,7 +148,8 @@ jobs:
             python tools/gcp.py run_user_acceptance_tests -v \
               --instance_name=gcp-<<parameters.framework>> \
               --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>> \
-              --docker_image_name=nvcr.io/nvidia/<<parameters.framework>>:<<pipeline.parameters.docker_tag>>-<<parameters.framework_tag>>
+              --docker_image_name=nvcr.io/nvidia/<<parameters.framework>>:<<pipeline.parameters.docker_tag>>-<<parameters.framework_tag>> \
+              --test_args="<<parameters.test_args>>"
 
 workflows:
   lint:
@@ -179,12 +183,14 @@ workflows:
           name: "run_user_acceptance_tests_gcp_tensorflow"
           framework: tensorflow
           framework_tag: "tf2-py3"
+          test_args: "--skip-torch"
           requires:
             - "create_vm_gcp_tensorflow"
       - run_user_acceptance_tests_gcp:
           name: "run_user_acceptance_tests_gcp_pytorch"
           framework: pytorch
           framework_tag: "py3"
+          test_args: "--skip-keras --skip-tensorflow"
           requires:
             - "create_vm_gcp_pytorch"
       # delete vms on GCP
