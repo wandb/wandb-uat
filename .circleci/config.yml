@@ -143,7 +143,7 @@ workflows:
           name: "slack-notify-on-start"
           context: slack-secrets
           message: ":nvidia: :runner: *Nightly NVIDIA UAT run started!*"
-      # manage vms
+      # manage vms on GCP
       - create_vm_gcp:
           matrix:
             parameters:
@@ -155,6 +155,7 @@ workflows:
           matrix:
             parameters:
               framework: [ "tensorflow", "pytorch" ]
+          name: "delete_vm_gcp_<<matrix.framework>>"
           requires:
             - "create_vm_gcp_<<matrix.framework>>"
       # todo: run the tests
