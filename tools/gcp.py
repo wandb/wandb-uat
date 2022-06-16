@@ -81,7 +81,7 @@ class CLI:
             f"count={self.config.accelerator_count}",
         ]
         self.print(" ".join(cmd))
-        p = subprocess.run(cmd)
+        # p = subprocess.run(cmd)
 
         # Agree to NVIDIA's prompt and install the GPU driver.
         # This monster below is here bc the yes command
@@ -93,8 +93,6 @@ class CLI:
             "ssh",
             self.config.instance_name,
             "--command",
-            "num_gpu=$(lspci -d '10de:*:0300' -s '.0' | wc -l); "
-            "echo $num_gpu; "
             "source /etc/nvidia-vmi-version.txt; "
             'REGISTRY="nvcr.io"; NVIDIA_DIR="/var/tmp/nvidia"; '
             "sudo gsutil cp "
