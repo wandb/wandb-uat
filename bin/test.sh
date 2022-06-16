@@ -62,7 +62,7 @@ fi
 
 for t in $TESTS; do
   skip=0
-  for s in ${SKIPS[@]}; do
+  for s in "${SKIPS[@]}"; do
     if [[ "$t" =~ $s ]]; then
       skip=1
       break

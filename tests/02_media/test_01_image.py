@@ -8,7 +8,7 @@ import wandb
 from PIL import Image
 
 
-def main():
+def main() -> None:
     run = wandb.init()
     run_path = run.path
 
@@ -28,7 +28,7 @@ def main():
         check(run_path)
 
 
-def check(run_path):
+def check(run_path: str) -> None:
     api = wandb.Api()
     api_run = api.run(run_path)
     assert api_run.summary["np_image"]["_type"] == "image-file"
