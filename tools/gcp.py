@@ -1,7 +1,8 @@
 import argparse
 import os
 import subprocess
-import time
+
+# import time
 from dataclasses import dataclass, fields
 
 
@@ -81,36 +82,44 @@ class CLI:
             f"count={self.config.accelerator_count}",
         ]
         self.print(" ".join(cmd))
-        subprocess.run(cmd)
+        p = subprocess.run(cmd)
 
         # Agree to NVIDIA's prompt and install the GPU driver
-        for _ in range(6):
-            # run the yes command and pipe its output to the next command
-            yes = subprocess.Popen(
-                ["echo", "Y"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            p = subprocess.run(
-                [
-                    "gcloud",
-                    "compute",
-                    "ssh",
-                    self.config.instance_name,
-                ],
-                # input=b"Y\r\n",
-                stdin=yes.stdout,
-            )
-            # yes.wait()
-            # import signal
-            # yes.send_signal(signal.SIGINT)
-            if p.returncode == 0:
-                self.print("GPU driver installed")
-                break
-            else:
-                # allow some time for the VM to boot
-                self.print("Waiting for VM to boot...")
-                time.sleep(10)
+        # for _ in range(6):
+        #     # run the yes command and pipe its output to the next command
+        #     # yes = subprocess.Popen(
+        #     #     ["echo", "Y"],
+        #     #     stdout=subprocess.PIPE,
+        #     #     stderr=subprocess.PIPE,
+        #     # )
+        #     """
+        #     gpu_check
+        #     install_driver
+        #     enable_persistence_mode
+        #     install_nv_peer_mem
+        #     """
+        #     p = subprocess.run(
+        #         [
+        #             "gcloud",
+        #             "compute",
+        #             "ssh",
+        #             self.config.instance_name,
+        #             "--command",
+        #             "echo Y",
+        #         ],
+        #         input=b"Y\r\n",
+        #         # stdin=yes.stdout,
+        #     )
+        #     # yes.wait()
+        #     # import signal
+        #     # yes.send_signal(signal.SIGINT)
+        #     if p.returncode == 0:
+        #         self.print("GPU driver installed")
+        #         break
+        #     else:
+        #         # allow some time for the VM to boot
+        #         self.print("Waiting for VM to boot...")
+        #         time.sleep(10)
 
         return p.returncode
 
