@@ -85,6 +85,10 @@ class CLI:
 
         # Agree to NVIDIA's prompt and install the GPU driver
         for _ in range(6):
+            # run the yes command and pipe its output to the next command
+            yes = subprocess.Popen(
+                ["yes"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             p = subprocess.run(
                 [
                     "gcloud",
@@ -92,8 +96,10 @@ class CLI:
                     "ssh",
                     self.config.instance_name,
                 ],
-                input=b"Y\r\n",
+                # input=b"Y\r\n",
+                stdin=yes.stdout,
             )
+            yes.wait()
             if p.returncode == 0:
                 self.print("GPU driver installed")
                 break
