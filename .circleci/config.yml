@@ -94,39 +94,27 @@ jobs:
     parameters:
       framework:
         type: string
+      execute:
+        type: boolean
+        default: true
     docker:
       - image: "python:3.8"
     steps:
       - checkout
-      - gke/install
-#      - run:
-#          name: "Update gcloud components"
-#          command: gcloud --quiet components update
-      - setup_gcloud
-      - run:
-          name: "Create GCP VM"
-          command: |
-            python tools/gcp.py create_vm -v \
-              --instance_name=gcp-<<parameters.framework>> \
-              --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>>
-
-  delete_vm_gcp:
-    parameters:
-      framework:
-        type: string
-    docker:
-      - image: "python:3.8"
-    steps:
-      - checkout
-      - gke/install
-#      - run:
-#          name: "Update gcloud components"
-#          command: gcloud --quiet components update
-      - setup_gcloud
-      - run:
-          name: "Delete GCP VM"
-          command: |
-            python tools/gcp.py delete_vm -v --instance_name=gcp-<<parameters.framework>>
+      - when:
+          condition: << parameters.execute >>
+          steps:
+            - gke/install
+#            - run:
+#                name: "Update gcloud components"
+#                command: gcloud --quiet components update
+            - setup_gcloud
+            - run:
+                name: "Create GCP VM"
+                command: |
+                  python tools/gcp.py create_vm -v \
+                    --instance_name=gcp-<<parameters.framework>> \
+                    --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>>
 
   user_acceptance_tests_gcp:
     parameters:
@@ -220,6 +208,7 @@ workflows:
             parameters:
               framework: [ "tensorflow", "pytorch" ]
           name: "create_vm_gcp_<<matrix.framework>>"
+          execute: << pipeline.parameters.execute_gcp >>
           requires:
             - "slack-notify-on-start"
       # run the user acceptance tests, shut down the VMs after the tests are finished
