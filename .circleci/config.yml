@@ -165,7 +165,7 @@ workflows:
           name: "slack-notify-on-start"
           context: slack-secrets
           message: ":nvidia: :runner: *Nightly NVIDIA UAT run started!*"
-      # manage vms on GCP
+      # create vms on GCP
       - create_vm_gcp:
           matrix:
             parameters:
@@ -173,14 +173,7 @@ workflows:
           name: "create_vm_gcp_<<matrix.framework>>"
           requires:
             - "slack-notify-on-start"
-      - delete_vm_gcp:
-          matrix:
-            parameters:
-              framework: [ "tensorflow", "pytorch" ]
-          name: "delete_vm_gcp_<<matrix.framework>>"
-          requires:
-            - "create_vm_gcp_<<matrix.framework>>"
-      # todo: run the tests
+      # run the user acceptance tests
       - run_user_acceptance_tests_gcp:
           name: "run_user_acceptance_tests_gcp_tensorflow"
           framework: tensorflow
@@ -193,6 +186,14 @@ workflows:
           framework_tag: "py3"
           requires:
             - "create_vm_gcp_pytorch"
+      # delete vms on GCP
+      - delete_vm_gcp:
+          matrix:
+            parameters:
+              framework: [ "tensorflow", "pytorch" ]
+          name: "delete_vm_gcp_<<matrix.framework>>"
+          requires:
+            - "run_user_acceptance_tests_gcp_<<matrix.framework>>"
       # we're done, post on Slack
       - slack_notify:
           name: "slack-notify-on-finish"
