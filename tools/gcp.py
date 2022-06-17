@@ -21,7 +21,6 @@ class Config:
     gcp_project_id: str = "wandb-client-cicd"
     project: str = "nvidia-ngc-public"
     vm_image_name: str = "nvidia-gpu-cloud-image-pytorch-20220228"
-    # vm_image_name: str = "nvidia-gpu-cloud-image-tensorflow-20220228"
     docker_image_name: str = "nvcr.io/nvidia/pytorch:22.02-py3"
     python_version: str = "3.8"
     git_branch: str = "main"
@@ -131,7 +130,6 @@ class CLI:
         self.print(cmd)
         for _ in range(6):
             p = subprocess.run(cmd)
-            # input=b"Y\r\n"
             if p.returncode == 0:
                 self.print("GPU driver installed")
                 break
