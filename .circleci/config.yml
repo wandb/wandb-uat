@@ -148,7 +148,6 @@ jobs:
             - setup_gcloud
             - run:
                 name: "Run user acceptance tests"
-                # todo: add skips for tests, specific to the other frameworks
                 command: |
                   WANDB_PROJECT=nvidia-gcp-<<parameters.framework>>-$(date -u +%Y%m%d) \
                   python tools/gcp.py run_user_acceptance_tests -v \
