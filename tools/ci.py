@@ -62,9 +62,7 @@ def trigger(args: argparse.Namespace) -> None:
     :return:
     """
     url = "https://circleci.com/api/v2/project/gh/wandb/wandb-uat/pipeline"
-    default_clouds = "gcp,aws,azure"
-
-    default_clouds_set = set(default_clouds.split(","))
+    default_clouds_set = {"gcp", "aws", "azure"}
     requested_clouds_set = (
         set(args.clouds.split(",")) if args.clouds else default_clouds_set
     )
