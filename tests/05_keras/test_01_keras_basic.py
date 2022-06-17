@@ -38,7 +38,7 @@ def get_dataset(data_size: int) -> Tuple[np.ndarray, np.ndarray]:
 
 def main(args: Union[argparse.Namespace, types.SimpleNamespace]) -> None:
 
-    run = wandb.init(sync_tensorboard=args.tensorboard)
+    run = wandb.init(name=__file__, sync_tensorboard=args.tensorboard)
     run_path = run.path
 
     callbacks: List = []
