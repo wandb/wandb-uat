@@ -42,7 +42,6 @@ def poll(
         for work_id in workflow_ids:
             work_status_url = f"https://circleci.com/api/v2/workflow/{work_id}"
             r = requests.get(work_status_url, auth=(args.api_token, ""))
-            # print("STATUS", work_status_url)
             assert r.status_code == 200, f"Error making api work request: {r}"
             w = r.json()
             status = w["status"]
