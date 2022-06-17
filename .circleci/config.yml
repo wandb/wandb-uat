@@ -26,6 +26,9 @@ parameters:
   docker_tag:
     type: string
     default: "22.02"
+  wandb_version:
+    type: string
+    default: "0.12.18"
 
 commands:
   setup_gcloud:
@@ -154,7 +157,8 @@ jobs:
                     --instance_name=gcp-<<parameters.framework>> \
                     --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>> \
                     --docker_image_name=nvcr.io/nvidia/<<parameters.framework>>:<<pipeline.parameters.docker_tag>>-<<parameters.framework_tag>> \
-                    --test_args="<<parameters.test_args>>"
+                    --test_args="<<parameters.test_args>>" \
+                    --wandb_version="<<pipeline.parameters.wandb_version>>"
             - run:
                 name: "Delete GCP VM"
                 when: always

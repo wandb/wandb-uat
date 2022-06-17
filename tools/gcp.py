@@ -25,6 +25,7 @@ class Config:
     python_version: str = "3.8"
     git_branch: str = "main"
     test_args: str = "--all"
+    wandb_version: str = "0.12.18"
 
 
 class CLI:
@@ -162,7 +163,8 @@ class CLI:
             f"--env WANDB_API_KEY={os.environ.get('WANDB_API_KEY')} "
             f"--env WANDB_PROJECT={os.environ.get('WANDB_PROJECT')} "
             f"{self.config.docker_image_name} "
-            f'/bin/bash -c "pip install wandb[media] && '
+            f'/bin/bash -c "pip install wandb[media]=='
+            f"{self.config.wandb_version} && "
             f'./bin/test.sh {self.config.test_args}"',
         ]
         self.print(" ".join(cmd))
