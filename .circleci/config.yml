@@ -10,7 +10,7 @@ parameters:
     default: false
   slack_notify:
     type: boolean
-    default: false
+    default: true
   execute_gcp:
     type: boolean
     default: true
