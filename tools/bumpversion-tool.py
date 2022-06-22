@@ -47,7 +47,7 @@ def main() -> None:
     # try:
     config = configparser.ConfigParser()
     config.read(".bumpversion.cfg")
-    pinned_sdk_version = config["bumpversion"]["pinned_sdk_version"]
+    pinned_sdk_version = config["bumpversion"]["current_version"]
     latest_sdk_version = get_latest_sdk_version()
 
     if parse_version(latest_sdk_version) > parse_version(pinned_sdk_version):
