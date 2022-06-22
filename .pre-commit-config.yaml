@@ -34,3 +34,4 @@ repos:
     rev: v0.961
     hooks:
       - id: mypy
+#        args: [--install-types]
