@@ -38,7 +38,8 @@ def bump_version(new_version: str) -> None:
     bump_args = []
     if args.debug:
         bump_args += ["--allow-dirty", "--dry-run", "--verbose"]
-    bump_args += ["--new-version", new_version, "dev"]
+    bump_args += ["--new-version", new_version]
+    print(bump_args)
     bumpversion_main(bump_args)
 
 
