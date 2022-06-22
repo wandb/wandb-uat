@@ -44,25 +44,28 @@ def bump_version(new_version: str) -> None:
 
 
 def main() -> None:
-    # try:
-    config = configparser.ConfigParser()
-    config.read(".bumpversion.cfg")
-    pinned_sdk_version = config["bumpversion"]["current_version"]
-    latest_sdk_version = get_latest_sdk_version()
+    try:
+        config = configparser.ConfigParser()
+        config.read(".bumpversion.cfg")
+        pinned_sdk_version = config["bumpversion"]["current_version"]
+        latest_sdk_version = get_latest_sdk_version()
 
-    if parse_version(latest_sdk_version) > parse_version(pinned_sdk_version):
-        print(f"Latest sdk version is {latest_sdk_version}")
-        print(f"Pinned sdk version is {pinned_sdk_version}")
-        print("Updating pinned sdk version")
-        bump_version(latest_sdk_version)
-    else:
-        print(f"Pinned sdk version {pinned_sdk_version} the latest release.")
-    sys.exit(0)
+        if parse_version(latest_sdk_version) > parse_version(
+            pinned_sdk_version
+        ):
+            print(f"Latest sdk version is {latest_sdk_version}")
+            print(f"Pinned sdk version is {pinned_sdk_version}")
+            print("Updating pinned sdk version")
+            bump_version(latest_sdk_version)
+        else:
+            print(
+                f"Pinned sdk version {pinned_sdk_version} the latest release."
+            )
+        sys.exit(0)
 
-
-# except Exception as e:
-#     print(f"Failed to update pinned sdk version: {e}")
-#     sys.exit(1)
+    except Exception as e:
+        print(f"Failed to update pinned sdk version: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
