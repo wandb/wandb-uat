@@ -25,7 +25,7 @@ class Config:
     python_version: str = "3.8"
     git_branch: str = "main"
     test_args: str = "--all"
-    wandb_version: str = "0.12.20"
+    wandb_version: str = "0.12.21"
 
 
 class CLI:
