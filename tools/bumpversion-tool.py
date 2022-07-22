@@ -26,7 +26,7 @@ def version_problem(current_version: str) -> None:
 
 
 def get_latest_sdk_version() -> str:
-    url = "https://api.github.com/repos/wandb/client/releases/latest"
+    url = "https://api.github.com/repos/wandb/wandb/releases/latest"
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Failed to get latest sdk version: {response.status_code}")

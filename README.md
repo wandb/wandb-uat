@@ -3,7 +3,7 @@ User acceptance testing for the [Weights & Biases](https://wandb.com) python SDK
 
 ## Introduction
 This repository contains user acceptance tests for the
-[Weights & Biases](https://github.com/wandb/client) library
+[Weights & Biases](https://github.com/wandb/wandb) library
 and utilities to run the tests in cloud environments.
 
 ## Installation
