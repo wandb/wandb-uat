@@ -100,6 +100,9 @@ jobs:
       execute:
         type: boolean
         default: true
+      notify_on_failure:
+        type: boolean
+        default: true
     docker:
       - image: "python:3.8"
     steps:
@@ -118,6 +121,15 @@ jobs:
                   python tools/gcp.py create_vm -v \
                     --instance_name=gcp-<<parameters.framework>> \
                     --vm_image_name=nvidia-gpu-cloud-image-<<parameters.framework>>-<<pipeline.parameters.vm_image_tag>>
+            - when:
+                condition: << parameters.notify_on_failure >>
+                steps:
+                  - slack/notify:
+                      event: fail
+                      template: basic_fail_1
+                      mentions: "@channel"
+                      # taken from slack-secrets context
+                      channel: $SLACK_SDK_NIGHTLY_CI_CHANNEL
 
   user_acceptance_tests_gcp:
     parameters:
@@ -212,6 +224,8 @@ workflows:
               framework: [ "tensorflow", "pytorch" ]
           name: "create_vm_gcp_<<matrix.framework>>"
           execute: << pipeline.parameters.execute_gcp >>
+          context: slack-secrets
+          notify_on_failure: << pipeline.parameters.slack_notify >>
           requires:
             - "slack-notify-on-start"
       # run the user acceptance tests, shut down the VMs after the tests are finished
