@@ -28,7 +28,7 @@ parameters:
     default: "22.02"
   wandb_version:
     type: string
-    default: "0.13.6"
+    default: "0.13.7"
 
 commands:
   setup_gcloud:
@@ -111,9 +111,9 @@ jobs:
           condition: << parameters.execute >>
           steps:
             - gke/install
-#            - run:
-#                name: "Update gcloud components"
-#                command: gcloud --quiet components update
+            - run:
+                name: "Update gcloud components"
+                command: gcloud --quiet components update
             - setup_gcloud
             - run:
                 name: "Create GCP VM"
