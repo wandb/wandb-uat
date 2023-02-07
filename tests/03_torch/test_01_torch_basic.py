@@ -54,7 +54,6 @@ def train(
     dataloader: DataLoader,
     sync_tensorboard: bool,
 ) -> str:
-
     run: wandb.sdk.wandb_run.Run = wandb.init(
         name=__file__, sync_tensorboard=sync_tensorboard
     )
