@@ -37,7 +37,6 @@ def get_dataset(data_size: int) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def main(args: Union[argparse.Namespace, types.SimpleNamespace]) -> None:
-
     run = wandb.init(name=__file__, sync_tensorboard=args.tensorboard)
     run_path = run.path
 
@@ -82,7 +81,6 @@ def check(run_path: str, tensorboard: bool = False) -> None:
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--data-size",
