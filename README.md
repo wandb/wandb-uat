@@ -11,7 +11,7 @@ The recommended installation includes optional dependencies, which will provide 
 with the most complete experience logging rich data types.
 
 ```shell
-$ pip install wandb[media]==0.14.0
+$ pip install wandb[media]==0.15.1
 ```
 
 ## Testing
