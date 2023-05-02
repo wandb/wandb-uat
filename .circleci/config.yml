@@ -28,7 +28,7 @@ parameters:
     default: "22.02"
   wandb_version:
     type: string
-    default: "0.14.0"
+    default: "0.15.1"
 
 commands:
   setup_gcloud:
