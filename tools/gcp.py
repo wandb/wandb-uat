@@ -102,8 +102,7 @@ class CLI:
         p = subprocess.run(cmd)
 
         # Agree to NVIDIA's prompt and install the GPU driver.
-        # This monster below is here bc the yes command
-        # and a gazillion alternatives do not work on circleci.
+        # This avoids relying on an interactive prompt in automation.
         # reverse-engineered from /usr/bin/gcp-ngc-login.sh
         cmd = [
             "gcloud",
